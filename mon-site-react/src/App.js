@@ -33,29 +33,32 @@ export default function EcommerceWhatsApp() {
     loadData();
   }, []);
 
-  const loadData = async () => {
+  // 🔥 VERSION CORRIGÉE : localStorage
+  const loadData = () => {
     try {
-      const vendorsData = await window.storage.get('vendors');
-      const productsData = await window.storage.get('products');
+      const vendorsData = localStorage.getItem('vendors');
+      const productsData = localStorage.getItem('products');
 
-      if (vendorsData) setVendors(JSON.parse(vendorsData.value));
-      if (productsData) setProducts(JSON.parse(productsData.value));
+      if (vendorsData) setVendors(JSON.parse(vendorsData));
+      if (productsData) setProducts(JSON.parse(productsData));
     } catch (error) {
-      console.log('Première visite - initialisation des données');
+      console.log('Erreur lors du chargement des données');
     }
   };
 
-  const saveVendors = async (newVendors) => {
-    await window.storage.set('vendors', JSON.stringify(newVendors));
+  // 🔥 VERSION CORRIGÉE : localStorage
+  const saveVendors = (newVendors) => {
+    localStorage.setItem('vendors', JSON.stringify(newVendors));
     setVendors(newVendors);
   };
 
-  const saveProducts = async (newProducts) => {
-    await window.storage.set('products', JSON.stringify(newProducts));
+  // 🔥 VERSION CORRIGÉE : localStorage
+  const saveProducts = (newProducts) => {
+    localStorage.setItem('products', JSON.stringify(newProducts));
     setProducts(newProducts);
   };
 
-  const handleVendorSubmit = async () => {
+  const handleVendorSubmit = () => {
     if (!vendorForm.name || !vendorForm.email || !vendorForm.phone || 
         !vendorForm.whatsapp || !vendorForm.storeName || !vendorForm.description) {
       alert('Veuillez remplir tous les champs');
@@ -68,7 +71,7 @@ export default function EcommerceWhatsApp() {
       createdAt: new Date().toISOString()
     };
 
-    await saveVendors([...vendors, newVendor]);
+    saveVendors([...vendors, newVendor]);
 
     setVendorForm({
       name: '',
@@ -83,7 +86,7 @@ export default function EcommerceWhatsApp() {
     setCurrentPage('add-product');
   };
 
-  const handleProductSubmit = async () => {
+  const handleProductSubmit = () => {
     if (!productForm.name || !productForm.price || !productForm.category || 
         !productForm.description || !productForm.vendorId) {
       alert('Veuillez remplir tous les champs obligatoires');
@@ -96,7 +99,7 @@ export default function EcommerceWhatsApp() {
       createdAt: new Date().toISOString()
     };
 
-    await saveProducts([...products, newProduct]);
+    saveProducts([...products, newProduct]);
 
     setProductForm({
       name: '',
@@ -114,7 +117,7 @@ export default function EcommerceWhatsApp() {
     const vendor = vendors.find(v => v.id === product.vendorId);
     if (vendor && vendor.whatsapp) {
       const message = `Bonjour, je suis intéressé(e) par: ${product.name} - ${product.price} FCFA`;
-      const whatsappUrl = `https://wa.me/${vendor.whatsapp.replace(/\\D/g, '')}?text=${encodeURIComponent(message)}`;
+      const whatsappUrl = `https://wa.me/${vendor.whatsapp.replace(/\D/g, '')}?text=${encodeURIComponent(message)}`;
       window.open(whatsappUrl, '_blank');
     }
   };
@@ -169,10 +172,11 @@ export default function EcommerceWhatsApp() {
 
       {/* Main Content */}
       <main className="container mx-auto px-4 py-8">
+        {/* PAGE HOME */}
         {currentPage === 'home' && (
           <div>
-            {/* Search and Filter */}
             <div className="mb-8 space-y-4">
+              {/* Search */}
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                 <input
@@ -184,6 +188,7 @@ export default function EcommerceWhatsApp() {
                 />
               </div>
 
+              {/* Categories */}
               <div className="flex flex-wrap gap-2">
                 <button
                   onClick={() => setSelectedCategory('all')}
@@ -195,6 +200,7 @@ export default function EcommerceWhatsApp() {
                 >
                   Tous
                 </button>
+
                 {categories.map(cat => (
                   <button
                     key={cat}
@@ -211,7 +217,7 @@ export default function EcommerceWhatsApp() {
               </div>
             </div>
 
-            {/* Products Grid */}
+            {/* Products */}
             {filteredProducts.length === 0 ? (
               <div className="text-center py-16">
                 <ShoppingCart className="w-16 h-16 text-gray-300 mx-auto mb-4" />
@@ -265,6 +271,7 @@ export default function EcommerceWhatsApp() {
           </div>
         )}
 
+        {/* PAGE VENDEUR */}
         {currentPage === 'vendor-signup' && (
           <div className="max-w-2xl mx-auto">
             <div className="bg-white rounded-2xl shadow-xl p-8">
@@ -274,13 +281,14 @@ export default function EcommerceWhatsApp() {
               </h2>
 
               <div className="space-y-4">
+                {/* Inputs */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Nom complet</label>
                   <input
                     type="text"
                     value={vendorForm.name}
-                    onChange={(e) => setVendorForm({...vendorForm, name: e.target.value})}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus;border-transparent"
+                    onChange={(e) => setVendorForm({ ...vendorForm, name: e.target.value })}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg"
                   />
                 </div>
 
@@ -289,8 +297,8 @@ export default function EcommerceWhatsApp() {
                   <input
                     type="email"
                     value={vendorForm.email}
-                    onChange={(e) => setVendorForm({...vendorForm, email: e.target.value})}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus;border-transparent"
+                    onChange={(e) => setVendorForm({ ...vendorForm, email: e.target.value })}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg"
                   />
                 </div>
 
@@ -299,21 +307,18 @@ export default function EcommerceWhatsApp() {
                   <input
                     type="tel"
                     value={vendorForm.phone}
-                    onChange={(e) => setVendorForm({...vendorForm, phone: e.target.value})}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus;border-transparent"
+                    onChange={(e) => setVendorForm({ ...vendorForm, phone: e.target.value })}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    WhatsApp (avec indicatif pays, ex: 221776543210)
-                  </label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">WhatsApp (ex: 221776543210)</label>
                   <input
                     type="tel"
                     value={vendorForm.whatsapp}
-                    onChange={(e) => setVendorForm({...vendorForm, whatsapp: e.target.value})}
-                    placeholder="221776543210"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus;border-transparent"
+                    onChange={(e) => setVendorForm({ ...vendorForm, whatsapp: e.target.value })}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg"
                   />
                 </div>
 
@@ -322,8 +327,8 @@ export default function EcommerceWhatsApp() {
                   <input
                     type="text"
                     value={vendorForm.storeName}
-                    onChange={(e) => setVendorForm({...vendorForm, storeName: e.target.value})}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus;border-transparent"
+                    onChange={(e) => setVendorForm({ ...vendorForm, storeName: e.target.value })}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg"
                   />
                 </div>
 
@@ -331,15 +336,15 @@ export default function EcommerceWhatsApp() {
                   <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
                   <textarea
                     value={vendorForm.description}
-                    onChange={(e) => setVendorForm({...vendorForm, description: e.target.value})}
+                    onChange={(e) => setVendorForm({ ...vendorForm, description: e.target.value })}
                     rows="4"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus;border-transparent"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg"
                   />
                 </div>
 
                 <button
                   onClick={handleVendorSubmit}
-                  className="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white py-3 rounded-lg hover:from-purple-700 hover:to-pink-700 transition font-semibold"
+                  className="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white py-3 rounded-lg font-semibold"
                 >
                   S'inscrire
                 </button>
@@ -348,6 +353,7 @@ export default function EcommerceWhatsApp() {
           </div>
         )}
 
+        {/* PAGE AJOUT PRODUIT */}
         {currentPage === 'add-product' && (
           <div className="max-w-2xl mx-auto">
             <div className="bg-white rounded-2xl shadow-xl p-8">
@@ -357,12 +363,13 @@ export default function EcommerceWhatsApp() {
               </h2>
 
               <div className="space-y-4">
+                {/* Vendeur */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Vendeur</label>
                   <select
                     value={productForm.vendorId}
-                    onChange={(e) => setProductForm({...productForm, vendorId: e.target.value})}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-600 focus:border-transparent"
+                    onChange={(e) => setProductForm({ ...productForm, vendorId: e.target.value })}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg"
                   >
                     <option value="">Sélectionnez un vendeur</option>
                     {vendors.map(v => (
@@ -371,60 +378,64 @@ export default function EcommerceWhatsApp() {
                   </select>
                 </div>
 
+                {/* Nom produit */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Nom du produit</label>
                   <input
                     type="text"
                     value={productForm.name}
-                    onChange={(e) => setProductForm({...productForm, name: e.target.value})}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-600 focus:border-transparent"
+                    onChange={(e) => setProductForm({ ...productForm, name: e.target.value })}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg"
                   />
                 </div>
 
+                {/* Prix */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Prix (FCFA)</label>
                   <input
                     type="number"
                     value={productForm.price}
-                    onChange={(e) => setProductForm({...productForm, price: e.target.value})}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-600 focus:border-transparent"
+                    onChange={(e) => setProductForm({ ...productForm, price: e.target.value })}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg"
                   />
                 </div>
 
+                {/* Catégorie */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Catégorie</label>
                   <input
                     type="text"
                     value={productForm.category}
-                    onChange={(e) => setProductForm({...productForm, category: e.target.value})}
-                    placeholder="Ex: Vêtements, Électronique, Alimentation..."
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-600 focus:border-transparent"
+                    onChange={(e) => setProductForm({ ...productForm, category: e.target.value })}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg"
                   />
                 </div>
 
+                {/* Image */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">URL de l'image (optionnel)</label>
                   <input
                     type="url"
                     value={productForm.image}
-                    onChange={(e) => setProductForm({...productForm, image: e.target.value})}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-600 focus:border-transparent"
+                    onChange={(e) => setProductForm({ ...productForm, image: e.target.value })}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg"
                   />
                 </div>
 
+                {/* Description */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
                   <textarea
                     value={productForm.description}
-                    onChange={(e) => setProductForm({...productForm, description: e.target.value})}
+                    onChange={(e) => setProductForm({ ...productForm, description: e.target.value })}
                     rows="4"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-600 focus:border-transparent"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg"
                   />
                 </div>
 
                 <button
                   onClick={handleProductSubmit}
-                  className="w-full bg-gradient-to-r from-green-600 to-green-700 text-white py-3 rounded-lg hover:from-green-700 hover:to-green-800 transition font-semibold"
+                  className="w-full bg-gradient-to-r from-green-600 to-green-700 text-white py-3 rounded-lg font-semibold"
                 >
                   Ajouter le produit
                 </button>
