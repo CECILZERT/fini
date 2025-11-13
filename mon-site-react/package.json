@@ -2,7 +2,7 @@
   "name": "mon-site-react",
   "version": "1.0.0",
   "private": true,
-  "homepage": "https://<ton-nom-utilisateur>.github.io/mon-site-react",
+  "homepage": ".",
   "dependencies": {
     "lucide-react": "^0.344.0",
     "react": "^18.3.1",
